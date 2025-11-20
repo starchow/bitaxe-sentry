@@ -6,6 +6,28 @@ import datetime
 
 logger = logging.getLogger(__name__)
 
+def format_difficulty_for_display(diff_value):
+    """
+    Format difficulty value for human-readable display.
+    
+    Args:
+        diff_value: Difficulty value (string, typically normalized number)
+    
+    Returns:
+        str: Formatted difficulty (e.g., "4.93G" or "1.05G")
+    """
+    try:
+        num = float(diff_value)
+        magnitude = abs(num)
+        
+        for unit, threshold in [('T', 1_000_000_000_000), ('G', 1_000_000_000), ('M', 1_000_000), ('K', 1_000)]:
+            if magnitude >= threshold:
+                return f"{num / threshold:.2f}{unit}"
+        
+        return f"{num:.2f}"
+    except (ValueError, TypeError):
+        return str(diff_value)
+
 def send_startup_notification(service="main"):
     """
     Send a notification when the system starts up to verify webhook configuration.
@@ -137,9 +159,12 @@ def send_diff_alert(miner, reading):
         return False
         
     logger.info(f"Preparing to send diff alert for {miner.name} via webhook: {DISCORD_WEBHOOK[:20]}...")
+    
+    # Format difficulty for display
+    formatted_diff = format_difficulty_for_display(reading.best_diff)
         
     content = (
-      f"🎉 **{miner.name}** new best diff! {reading.best_diff}\n"
+      f"🎉 **{miner.name}** new best diff! {formatted_diff}\n"
       f"Temperature: {reading.temperature:.1f}°C | Voltage: {reading.voltage:.2f}V | Hash Rate: {reading.hash_rate:.2f} MH/s"
     )
     
@@ -150,7 +175,7 @@ def send_diff_alert(miner, reading):
             timeout=10
         )
         response.raise_for_status()
-        logger.info(f"New best diff alert sent for {miner.name}: {reading.best_diff}")
+        logger.info(f"New best diff alert sent for {miner.name}: {formatted_diff}")
         return True
     except Exception as e:
         logger.error(f"Failed to send best diff alert: {e}")
