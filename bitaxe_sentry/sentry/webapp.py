@@ -192,15 +192,16 @@ def history(
     # Pre-slice the data for different time windows
     # Create dynamic windows based on retention period
     retention_hours = settings['RETENTION_DAYS'] * 24
+    logger.info(f"Retention period: {settings['RETENTION_DAYS']} days = {retention_hours} hours")
     windows = [1, 6]  # Always show 1h and 6h
     
     if retention_hours >= 24:
         windows.append(24)  # Add 24h if retention allows
     if retention_hours > 24:
-        # Add a longer window, but cap at retention hours for readability
-        max_window = min(retention_hours, 168)  # Cap at 1 week (168 hours) for readability
-        if max_window not in windows:
-            windows.append(max_window)
+        # Add "all time" window (full retention period)
+        if retention_hours not in windows:
+            windows.append(retention_hours)
+            logger.info(f"Added window: {retention_hours}h (all time)")
     elif retention_hours < 24:
         # For short retention periods, add the full retention as an option
         if retention_hours not in windows and retention_hours > 6:
