@@ -161,14 +161,6 @@
                 </div>
                 <div class="chart-options">
                     <div class="chart-options-group">
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="hashRateChartCurved" onclick="toggleCurvedLines('hashRateChart', this)" title="Toggle Curved Lines">
-                            <i class="fas fa-bezier-curve"></i><span class="d-none d-md-inline"> Curved</span>
-                        </button>
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="hashRateChartPoints" onclick="toggleDataPoints('hashRateChart', this)" title="Toggle Data Points">
-                            <i class="fas fa-circle"></i><span class="d-none d-md-inline"> Points</span>
-                        </button>
-                    </div>
-                    <div class="chart-options-group">
                         <div class="btn-group me-2" role="group" aria-label="Units">
                             <button type="button" id="unitMh" class="btn btn-light btn-sm">MH/s</button>
                             <button type="button" id="unitTh" class="btn btn-light btn-sm">TH/s</button>
@@ -208,14 +200,6 @@
                 </div>
                 <div class="chart-options">
                     <div class="chart-options-group">
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="tempChartCurved" onclick="toggleCurvedLines('tempChart', this)" title="Toggle Curved Lines">
-                            <i class="fas fa-bezier-curve"></i><span class="d-none d-md-inline"> Curved</span>
-                        </button>
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="tempChartPoints" onclick="toggleDataPoints('tempChart', this)" title="Toggle Data Points">
-                            <i class="fas fa-circle"></i><span class="d-none d-md-inline"> Points</span>
-                        </button>
-                    </div>
-                    <div class="chart-options-group">
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="tempLegendDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Legend Position">
                                 <i class="fas fa-list"></i><span class="d-none d-md-inline"> Legend</span>
@@ -250,14 +234,6 @@
                     <canvas id="voltageChart"></canvas>
                 </div>
                 <div class="chart-options">
-                    <div class="chart-options-group">
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="voltageChartCurved" onclick="toggleCurvedLines('voltageChart', this)" title="Toggle Curved Lines">
-                            <i class="fas fa-bezier-curve"></i><span class="d-none d-md-inline"> Curved</span>
-                        </button>
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="voltageChartPoints" onclick="toggleDataPoints('voltageChart', this)" title="Toggle Data Points">
-                            <i class="fas fa-circle"></i><span class="d-none d-md-inline"> Points</span>
-                        </button>
-                    </div>
                     <div class="chart-options-group">
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="voltageLegendDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Legend Position">
@@ -294,14 +270,6 @@
                 </div>
                 <div class="chart-options">
                     <div class="chart-options-group">
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="errorChartCurved" onclick="toggleCurvedLines('errorChart', this)" title="Toggle Curved Lines">
-                            <i class="fas fa-bezier-curve"></i><span class="d-none d-md-inline"> Curved</span>
-                        </button>
-                        <button class="btn btn-sm btn-light chart-toggle-btn active" id="errorChartPoints" onclick="toggleDataPoints('errorChart', this)" title="Toggle Data Points">
-                            <i class="fas fa-circle"></i><span class="d-none d-md-inline"> Points</span>
-                        </button>
-                    </div>
-                    <div class="chart-options-group">
                         <div class="dropdown d-inline-block">
                             <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="errorLegendDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Legend Position">
                                 <i class="fas fa-list"></i><span class="d-none d-md-inline"> Legend</span>
@@ -330,6 +298,11 @@
 {{ windowed_data|tojson }}
 </script>
 
+<!-- Store the settings for JavaScript -->
+<script id="chart-settings" type="application/json">
+{{ settings|tojson }}
+</script>
+
 {% endif %}
 {% endblock %}
 
@@ -344,6 +317,7 @@
     // Global data storage
     let rawData = null;
     let windowedData = null;
+    let chartSettings = null;
     
     // Helper to get chart by ID
     function getChartById(chartId) {
@@ -404,12 +378,9 @@
         const chart = getChartById(chartId);
         if (!chart) return;
         
-        // Get button states
-        const curvedButton = document.getElementById(chartId + 'Curved');
-        const pointsButton = document.getElementById(chartId + 'Points');
-        
-        const useCurvedLines = curvedButton ? curvedButton.classList.contains('active') : true;
-        const showPoints = pointsButton ? pointsButton.classList.contains('active') : true;
+        // Use settings for chart display options
+        const useCurvedLines = chartSettings.CHART_CURVED_LINES;
+        const showPoints = chartSettings.CHART_SHOW_POINTS;
         
         const datasets = [];
         
@@ -450,46 +421,6 @@
         });
         
         console.log(`Updated ${chartId} with ${datasets.length} datasets`);
-    }
-    
-    // Toggle curved lines for a chart
-    function toggleCurvedLines(chartId, button) {
-        const chart = getChartById(chartId);
-        if (!chart) return;
-        
-        // Toggle button active state
-        button.classList.toggle('active');
-        const curved = button.classList.contains('active');
-        
-        // Update chart
-        chart.data.datasets.forEach(dataset => {
-            dataset.tension = curved ? 0.4 : 0;
-        });
-        
-        chart.update({
-            duration: 300,
-            easing: 'easeOutQuad'
-        });
-    }
-    
-    // Toggle data points for a chart
-    function toggleDataPoints(chartId, button) {
-        const chart = getChartById(chartId);
-        if (!chart) return;
-        
-        // Toggle button active state
-        button.classList.toggle('active');
-        const showPoints = button.classList.contains('active');
-        
-        // Update chart
-        chart.data.datasets.forEach(dataset => {
-            dataset.pointRadius = showPoints ? 3 : 0;
-        });
-        
-        chart.update({
-            duration: 300,
-            easing: 'easeOutQuad'
-        });
     }
     
     // Change legend position for a chart
@@ -764,11 +695,13 @@
                     const doc = parser.parseFromString(html, 'text/html');
                     const dataElement = doc.getElementById('readings-data');
                     const windowedDataElement = doc.getElementById('windowed-data');
+                    const settingsElement = doc.getElementById('chart-settings');
                     
-                    if (dataElement && windowedDataElement) {
+                    if (dataElement && windowedDataElement && settingsElement) {
                         try {
                             rawData = JSON.parse(dataElement.textContent.trim());
                             windowedData = JSON.parse(windowedDataElement.textContent.trim());
+                            chartSettings = JSON.parse(settingsElement.textContent.trim());
                             
                             console.log(`Data refreshed at ${new Date().toLocaleTimeString()}`);
                             
@@ -892,15 +825,18 @@
         // Get the data elements with JSON contents
         const dataElement = document.getElementById('readings-data');
         const windowedDataElement = document.getElementById('windowed-data');
+        const settingsElement = document.getElementById('chart-settings');
         
         // Only proceed if we have data
-        if (dataElement && windowedDataElement) {
+        if (dataElement && windowedDataElement && settingsElement) {
             try {
                 rawData = JSON.parse(dataElement.textContent.trim());
                 windowedData = JSON.parse(windowedDataElement.textContent.trim());
+                chartSettings = JSON.parse(settingsElement.textContent.trim());
                 
                 console.log("Raw data loaded for miners:", Object.keys(rawData));
                 console.log("Windowed data loaded for time windows:", Object.keys(windowedData));
+                console.log("Chart settings loaded:", chartSettings);
                 
                 // Check if we actually have data points
                 let hasData = false;

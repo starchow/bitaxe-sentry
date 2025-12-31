@@ -130,8 +130,13 @@ def history(
     miner_id: Optional[str] = Query(None),
     session: Session = Depends(get_session)
 ):
+    from .settings_manager import load_settings
+    
     # Get list of miners for dropdown
     miners = session.exec(select(Miner)).all()
+    
+    # Load settings for chart display options
+    settings = load_settings()
     
     # Parse miner_id to integer if it's not None or empty
     selected_miner = None
@@ -227,7 +232,8 @@ def history(
             "miners": miners,
             "selected_miner": selected_miner,
             "readings_by_miner": readings_by_miner,
-            "windowed_data": windowed_data
+            "windowed_data": windowed_data,
+            "settings": settings
         })
     )
 
