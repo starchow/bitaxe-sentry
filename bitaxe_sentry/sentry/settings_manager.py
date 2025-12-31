@@ -94,8 +94,8 @@ def save_settings(settings_dict):
         settings_dict["TEMP_MIN"] = float(settings_dict.get("TEMP_MIN", DEFAULT_SETTINGS["TEMP_MIN"]))
         settings_dict["TEMP_MAX"] = float(settings_dict.get("TEMP_MAX", DEFAULT_SETTINGS["TEMP_MAX"]))
         settings_dict["VOLT_MIN"] = float(settings_dict.get("VOLT_MIN", DEFAULT_SETTINGS["VOLT_MIN"]))
-        settings_dict["CHART_SHOW_POINTS"] = settings_dict.get("CHART_SHOW_POINTS", "false").lower() == "true"
-        settings_dict["CHART_CURVED_LINES"] = settings_dict.get("CHART_CURVED_LINES", "false").lower() == "true"
+        settings_dict["CHART_SHOW_POINTS"] = bool(settings_dict.get("CHART_SHOW_POINTS", DEFAULT_SETTINGS["CHART_SHOW_POINTS"]))
+        settings_dict["CHART_CURVED_LINES"] = bool(settings_dict.get("CHART_CURVED_LINES", DEFAULT_SETTINGS["CHART_CURVED_LINES"]))
         
         # Log the converted values for debugging
         logger.info(f"Saving settings - POLL_INTERVAL_MINUTES: {settings_dict['POLL_INTERVAL_MINUTES']}, "
