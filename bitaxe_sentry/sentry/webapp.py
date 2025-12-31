@@ -181,7 +181,7 @@ def history(
                 
             readings_by_miner[miner.name].append({
                 "timestamp": reading.timestamp.strftime("%H:%M:%S"),
-                "full_timestamp": reading.timestamp.isoformat(),
+                "full_timestamp": reading.timestamp.isoformat() + "Z",
                 "hash_rate": reading.hash_rate,
                 "temperature": reading.temperature,
                 "best_diff": format_large_number(reading.best_diff),

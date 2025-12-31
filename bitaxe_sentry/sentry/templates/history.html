@@ -368,9 +368,9 @@
         });
     }
     
-    // Format time as HH:MM:SS only
+    // Format time as HH:MM:SS in local timezone
     function formatTimeOnly(date) {
-        return date.toTimeString().split(' ')[0]; // HH:MM:SS format
+        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
     }
     
     // Update all charts with the selected time window
@@ -565,14 +565,10 @@
                             return `${context.dataset.label}: ${formattedValue}`;
                         },
                         title: function(context) {
-                            // Use the raw timestamp if available
-                            if (context[0] && context[0].raw && context[0].raw.rawTimestamp) {
-                                return context[0].raw.rawTimestamp;
-                            }
-                            // Fallback to formatted time
+                            // Always use local timezone formatting
                             if (context[0] && context[0].raw && context[0].raw.x) {
-                                const date = context[0].raw.x;
-                                return date.toTimeString().split(' ')[0]; // HH:MM:SS format
+                                const date = new Date(context[0].raw.x);
+                                return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
                             }
                             return '';
                         }
@@ -586,7 +582,6 @@
                 x: {
                     type: 'time',
                     time: {
-                        unit: 'hour',
                         displayFormats: {
                             hour: 'HH:mm',
                             minute: 'HH:mm',
@@ -595,12 +590,7 @@
                     },
                     ticks: {
                         autoSkip: true,
-                        maxTicksLimit: 20,
-                        callback: function(value, index, values) {
-                            // Just show the time part in HH:MM format
-                            const date = new Date(value);
-                            return date.toTimeString().split(':').slice(0, 2).join(':'); // HH:MM format
-                        }
+                        maxTicksLimit: 20
                     }
                 }
             },
